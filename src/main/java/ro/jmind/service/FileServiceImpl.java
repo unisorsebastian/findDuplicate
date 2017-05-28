@@ -18,7 +18,7 @@ public class FileServiceImpl implements FileService {
 		for (File f : files) {
 			FileDetail e = new FileDetail(f);
 			filesDetail.add(e);
-			System.out.println("processin file "+(i++)+" of "+numberOfFiles+";sha1: "+e.getFileHash()+";"+f.getAbsolutePath());
+			System.out.println("processing file "+(i++)+" of "+numberOfFiles+";sha1: "+e.getFileHash()+";"+f.getAbsolutePath());
 		}
 		return filesDetail;
 	}

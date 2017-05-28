@@ -15,7 +15,8 @@ public class AppStarter {
 		
 	}
 	public static void main(String ...a){
-		String folderLocation = "D:/_media/photos";
+		//String folderLocation = "D:/_media/photos";
+		String folderLocation = "D:/_media/photos/ana_google/Takeout/Google Photos";
 		FileService fileService = new FileServiceImpl();
 		List<File> fileList = fileService.getFileList(folderLocation);
 		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);

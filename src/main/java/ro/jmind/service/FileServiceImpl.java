@@ -23,6 +23,16 @@ public class FileServiceImpl implements FileService {
 		return filesDetail;
 	}
 	
+	@Override
+	public List<FileDetail> gatherFilesDetailByFileName(List<String> files) {
+		List<File> fileList = new ArrayList<>();
+		for(String s:files){
+			fileList.add(new File(s));
+		}
+		
+		return gatherFilesDetail(fileList);
+	}
+	
 	public List<File> getFileList(String location) {
 		File directory = new File(location);
 		gatherFilesInList(files,directory);
@@ -73,5 +83,4 @@ public class FileServiceImpl implements FileService {
 		}
 
 	}
-
 }

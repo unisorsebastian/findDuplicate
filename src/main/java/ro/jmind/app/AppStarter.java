@@ -1,6 +1,8 @@
 package ro.jmind.app;
 
 import java.io.File;
+import java.nio.channels.GatheringByteChannel;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -16,9 +18,18 @@ public class AppStarter {
 	}
 	public static void main(String ...a){
 		//String folderLocation = "D:/_media/photos";
-		String folderLocation = "D:/_media/photos/ana_google/Takeout/Google Photos";
+		String folderLocation = "D:/_media/photos/remove";
 		FileService fileService = new FileServiceImpl();
 		List<File> fileList = fileService.getFileList(folderLocation);
+
+//		TODO remove
+		List<String> fileLocation = new ArrayList<>();
+		for(File f:fileList){
+			fileLocation.add(f.getAbsolutePath());
+		}
+		List<FileDetail> test  = fileService.gatherFilesDetailByFileName(fileLocation);
+		
+		
 		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(gatherFilesDetail);
 		//System.out.println(duplicates);

@@ -94,12 +94,7 @@ public class FileDetail {
 		if (absoluteFile == null) {
 			if (other.absoluteFile != null)
 				return false;
-		} else if (!absoluteFile.equals(other.absoluteFile))
-			return false;
-		if (fileHash == null) {
-			if (other.fileHash != null)
-				return false;
-		} else if (!fileHash.equals(other.fileHash))
+		} else if (!absoluteFile.getAbsolutePath().equals(other.absoluteFile.getAbsolutePath()))
 			return false;
 		return true;
 	}

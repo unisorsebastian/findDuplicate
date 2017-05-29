@@ -30,7 +30,8 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void createFileDetailReport(List<FileDetail> fileDetailList, String reportLocation) {
-        List<String> linesToWrite = new ArrayList<>();
+    	reportLocation +="/fileDetailReport.txt";
+    	List<String> linesToWrite = new ArrayList<>();
         
         StringBuilder sb = new StringBuilder();
         sb.append("file hash");
@@ -65,6 +66,7 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     public void createDuplicatedFileReport(List<DuplicateFileDetail> duplicates, String reportLocation) {
+    	reportLocation +="/fileDuplicateReport.txt";
         List<String> linesToWrite = new ArrayList<>();
         StringBuilder sb = new StringBuilder();
         Integer maximumNumberOfDuplicatedFiles = Integer.MIN_VALUE;
@@ -91,13 +93,23 @@ public class ReportServiceImpl implements ReportService {
         for(DuplicateFileDetail dfd:duplicates){
             sb.setLength(0);
             sb.append(dfd.getHash());
+            sb.append(delimiter);
             final Set<FileDetail> duplicatedFiles = dfd.getDuplicates();
-            if(maximumNumberOfDuplicatedFiles<=duplicatedFiles.size()){
-                maximumNumberOfDuplicatedFiles = duplicatedFiles.size(); 
+            int numberOfFiles = duplicatedFiles.size();
+            String sizeMB="";
+            for(FileDetail fd:duplicatedFiles){
+            	sb.append(fd.getAbsoluteFile());
+            	sb.append(delimiter);
+            	sizeMB=fd.getHumanFileSize();
             }
-            
-            
+            for(int i=0;i<maximumNumberOfDuplicatedFiles-numberOfFiles;i++){
+            	sb.append(delimiter);
+            }
+            sb.append(sizeMB);
+            linesToWrite.add(sb.toString());
         }
+        
+        createReportFile(linesToWrite, reportLocation);
 
     }
 
@@ -105,7 +117,7 @@ public class ReportServiceImpl implements ReportService {
     private void createReportFile(List<String> linesToWrite, String reportLocation) {
         Path file = Paths.get(reportLocation);
         try {
-            Files.write(file, linesToWrite, Charset.forName("UTF-8"), StandardOpenOption.CREATE_NEW);
+            Files.write(file, linesToWrite, Charset.forName("UTF-8"), StandardOpenOption.CREATE);
         } catch (IOException e) {
             // TODO add logging
             e.printStackTrace();

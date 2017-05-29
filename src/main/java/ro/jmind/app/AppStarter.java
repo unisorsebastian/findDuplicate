@@ -19,7 +19,8 @@ public class AppStarter {
 		
 	}
 	public static void main(String ...a){
-		String folderLocation = "D:/_media/photos";
+//		String folderLocation = "D:/_media/photos";
+		String folderLocation = "D:\\_media\\photos\\remove";
 		
 		FileService fileService = new FileServiceImpl();
 		ReportService reportService = new ReportServiceImpl();
@@ -39,8 +40,12 @@ public class AppStarter {
 		
 		
 		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);
+		reportService.createFileDetailReport(gatherFilesDetail, folderLocation);
+		
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(gatherFilesDetail);
-		//System.out.println(duplicates);
+		reportService.createDuplicatedFileReport(duplicates, folderLocation);
+		
+		
 		String hash = null;
 		StringBuilder sb = null;
 		Set<FileDetail> fileDetails = null;

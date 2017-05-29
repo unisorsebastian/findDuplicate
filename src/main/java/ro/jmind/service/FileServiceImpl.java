@@ -50,7 +50,14 @@ public class FileServiceImpl implements FileService {
 			String fileHashLeft = fdLeft.getFileHash();
 			final String leftPath = fdLeft.getAbsoluteFile().getAbsolutePath();
 			for(FileDetail fdRight:filesDetailRight){
+				if(fdLeft.equals(fdRight)){
+					continue;
+				}
                 final String rightPath = fdRight.getAbsoluteFile().getAbsolutePath();
+                if(fdRight.getFileHash().equals(fileHashLeft)){
+                	System.out.println(leftPath);
+                	System.out.println(rightPath);
+                }
                 if(fdRight.getFileHash().equals(fileHashLeft) && !leftPath.equals(rightPath)){
 					boolean duplicateAdded = false;
 					for(DuplicateFileDetail d:duplicateFilesList){

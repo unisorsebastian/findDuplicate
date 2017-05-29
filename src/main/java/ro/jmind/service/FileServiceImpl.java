@@ -48,8 +48,10 @@ public class FileServiceImpl implements FileService {
 	public List<DuplicateFileDetail> calculateDuplicates(List<FileDetail> filesDetailLeft, List<FileDetail> filesDetailRight) {
 		for(FileDetail fdLeft:filesDetail){
 			String fileHashLeft = fdLeft.getFileHash();
+			final String leftPath = fdLeft.getAbsoluteFile().getAbsolutePath();
 			for(FileDetail fdRight:filesDetailRight){
-				if(fdRight.getFileHash().equals(fileHashLeft) && fdLeft!=fdRight){
+                final String rightPath = fdRight.getAbsoluteFile().getAbsolutePath();
+                if(fdRight.getFileHash().equals(fileHashLeft) && !leftPath.equals(rightPath)){
 					boolean duplicateAdded = false;
 					for(DuplicateFileDetail d:duplicateFilesList){
 						if(d.getHash().equals(fdRight.getFileHash())){

@@ -60,7 +60,11 @@ public class FileDetail {
 		}
 		String name = absoluteFile.getName();
 		int extPos = name.lastIndexOf(".");
-		extension = name.substring(extPos);
+		if(extPos>0){
+		    extension = name.substring(extPos);
+		} else {
+		    extension = "";
+		}
 		return extension;
 	}
 

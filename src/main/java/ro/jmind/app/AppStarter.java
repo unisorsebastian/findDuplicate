@@ -10,6 +10,8 @@ import ro.jmind.model.DuplicateFileDetail;
 import ro.jmind.model.FileDetail;
 import ro.jmind.service.FileService;
 import ro.jmind.service.FileServiceImpl;
+import ro.jmind.service.ReportService;
+import ro.jmind.service.ReportServiceImpl;
 
 public class AppStarter {
 
@@ -17,17 +19,23 @@ public class AppStarter {
 		
 	}
 	public static void main(String ...a){
-		//String folderLocation = "D:/_media/photos";
-		String folderLocation = "D:/_media/photos/remove";
+		String folderLocation = "D:/_media/photos";
+		
 		FileService fileService = new FileServiceImpl();
+		ReportService reportService = new ReportServiceImpl();
+		
+		
 		List<File> fileList = fileService.getFileList(folderLocation);
-
+		reportService.createFileListReport(fileList, folderLocation);
+		
 //		TODO remove
 		List<String> fileLocation = new ArrayList<>();
 		for(File f:fileList){
 			fileLocation.add(f.getAbsolutePath());
 		}
 		List<FileDetail> test  = fileService.gatherFilesDetailByFileName(fileLocation);
+		List<DuplicateFileDetail> duplicatesByString = fileService.calculateDuplicates(test);
+//      TODO remove end		
 		
 		
 		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);

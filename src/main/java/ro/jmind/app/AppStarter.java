@@ -1,67 +1,77 @@
 package ro.jmind.app;
 
+import static ro.jmind.model.Constants.RB;
+
 import java.io.File;
-import java.nio.channels.GatheringByteChannel;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 
 import ro.jmind.model.DuplicateFileDetail;
 import ro.jmind.model.FileDetail;
 import ro.jmind.service.FileService;
 import ro.jmind.service.FileServiceImpl;
+import ro.jmind.service.FileServiceLightImpl;
 import ro.jmind.service.ReportService;
 import ro.jmind.service.ReportServiceImpl;
 
 public class AppStarter {
+    
+    FileService fileService = new FileServiceImpl();
+    FileService fileServiceLight = new FileServiceLightImpl();
+    ReportService reportService = new ReportServiceImpl();
+    
+    String folderLocation = RB.getString("base.folder");
+    String reportFilesFoundInSource = folderLocation + "\\" + RB.getString("report.filesFoundInSource");
+    
+    String reportFilesDetails = folderLocation + "\\" + RB.getString("report.filesDetail");
+    String reportFilesDetailsLight = folderLocation + "\\" + RB.getString("report.filesDetailLight");
+    
+    String reportFilesDuplicated = folderLocation + "\\" + RB.getString("report.filesDuplicated");
+    String reportFilesDuplicatedLight = folderLocation + "\\" + RB.getString("report.filesDuplicatedLight");
+    
+    String reportFilesMarkedForDeletion = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletion");
+    String reportFilesMarkedForDeletionLight = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletionLight");
 
-	public AppStarter() {
-		
-	}
-	public static void main(String ...a){
-//		String folderLocation = "D:/_media/photos";
-		String folderLocation = "C:/Users/sunisor/remove";
-		
-		FileService fileService = new FileServiceImpl();
-		ReportService reportService = new ReportServiceImpl();
-		
-		
-		List<File> fileList = fileService.getFileList(folderLocation);
-		reportService.createFileListReport(fileList, folderLocation);
-		
-//		TODO remove
-//		List<String> fileLocation = new ArrayList<>();
-//		for(File f:fileList){
-//			fileLocation.add(f.getAbsolutePath());
-//		}
-//		List<FileDetail> test  = fileService.gatherFilesDetailByFileName(fileLocation);
-//		List<DuplicateFileDetail> duplicatesByString = fileService.calculateDuplicates(test);
-//      TODO remove end		
-		
-		//including sha
-		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);
-		//without sha
-		//List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetailLight(fileList);
-		reportService.createFileDetailReport(gatherFilesDetail, folderLocation);
-		
-		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(gatherFilesDetail);
-		reportService.createDuplicatedFileReport(duplicates, folderLocation);
-		
-		
-		String hash = null;
-		StringBuilder sb = null;
-		Set<FileDetail> fileDetails = null;
-		for(DuplicateFileDetail d:duplicates){
-			hash = d.getHash();
-			sb = new StringBuilder();
-			sb.append("hash:"+hash+"\n");
-			fileDetails = d.getDuplicates();
-			for(FileDetail fd:fileDetails){
-				sb.append("\t"+fd.getAbsoluteFile()+"\n");
-			}
-			System.out.println(sb);
-		}
-		
-	}
+    public AppStarter() {
+
+    }
+    
+    public void generateReportsLight(){
+        List<File> fileList = fileServiceLight.getFileList(folderLocation);
+        List<FileDetail> fileDetailLight = fileServiceLight.gatherFilesDetail(fileList);
+        List<DuplicateFileDetail> duplicates = fileServiceLight.calculateDuplicates(fileDetailLight);
+        List<FileDetail> markAllForDeletion = fileServiceLight.markForDeletion(duplicates);
+        
+        reportService.createFileListReport(fileList, reportFilesFoundInSource);
+        reportService.createFileDetailReport(fileDetailLight, reportFilesDetailsLight);
+        reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicatedLight);
+        reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletionLight);
+
+    }
+    
+    public void generateReports(){
+        List<File> fileList = fileService.getFileList(folderLocation);
+        List<FileDetail> fileDetail = fileService.gatherFilesDetail(fileList);
+        List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(fileDetail);
+        List<FileDetail> markAllForDeletion = fileService.markForDeletion(duplicates);
+        
+        reportService.createFileListReport(fileList, reportFilesFoundInSource);
+        reportService.createFileDetailReport(fileDetail, reportFilesDetails);
+        reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicated);
+        reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
+
+    }
+
+    public static void main(String... a) {
+        AppStarter app = new AppStarter();
+        
+        long startTime = System.currentTimeMillis();
+        app.generateReportsLight();
+        System.out.println("Light service done in:" + (System.currentTimeMillis() - startTime));
+        
+        startTime = System.currentTimeMillis();
+        app.generateReports();
+        System.out.println("Full service done in:" + (System.currentTimeMillis() - startTime));
+
+    }
 
 }

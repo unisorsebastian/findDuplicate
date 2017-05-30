@@ -9,20 +9,18 @@ public class FileDetail {
     private File absoluteFile;
     private String fileHash;
     private long calculationTime;
-    private long calculationTimeLight;
     private long fileSize;
     private String humanFileSize;
     private String extension;
+    private boolean readyForDeletion = false;
 
     public FileDetail(File file) {
-        long start = System.currentTimeMillis();
         this.absoluteFile = file;
         fileSize = absoluteFile.length();
         try {
-            calculateFileHash(file);
+            //calculateFileHash(file);
             getHumanFileSize();
             getExtension();
-            calculationTime = System.currentTimeMillis() - start;
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -30,32 +28,18 @@ public class FileDetail {
     }
 
     public FileDetail(String fileName) {
-        long start = System.currentTimeMillis();
-        this.absoluteFile = new File(fileName);
-        fileSize = absoluteFile.length();
-        try {
-            getHumanFileSize();
-            getExtension();
-            calculationTime = System.currentTimeMillis() - start;
-        } catch (Exception e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
+        this(new File(fileName));
     }
 
     public File getAbsoluteFile() {
         return absoluteFile;
     }
 
+    public void setFileHash(String fileHash) {
+        this.fileHash = fileHash;
+    }
+
     public String getFileHash() {
-//        if (fileHash == null || fileHash.length() < 1) {
-//            try {
-//                calculateFileHash(absoluteFile);
-//            } catch (Exception e) {
-//                // TODO Auto-generated catch block
-//                e.printStackTrace();
-//            }
-//        }
         return fileHash;
     }
 
@@ -63,8 +47,8 @@ public class FileDetail {
         return calculationTime;
     }
 
-    public long getCalculationTimeLight() {
-        return calculationTimeLight;
+    public void setCalculationTime(long calculationTime) {
+        this.calculationTime = calculationTime;
     }
 
     public long getFileSize() {
@@ -93,6 +77,14 @@ public class FileDetail {
             extension = "";
         }
         return extension;
+    }
+
+    public boolean isReadyForDeletion() {
+        return readyForDeletion;
+    }
+
+    public void setReadyForDeletion(boolean readyForDeletion) {
+        this.readyForDeletion = readyForDeletion;
     }
 
     @Override
@@ -126,25 +118,6 @@ public class FileDetail {
         return true;
     }
 
-    private void calculateFileHash(File file) throws Exception {
-        MessageDigest md = MessageDigest.getInstance("SHA1");
-        FileInputStream fis = new FileInputStream(file);
-        byte[] dataBytes = new byte[1024];
-
-        int nread = 0;
-
-        while ((nread = fis.read(dataBytes)) != -1) {
-            md.update(dataBytes, 0, nread);
-        }
-        fis.close();
-        byte[] mdbytes = md.digest();
-
-        // convert the byte to hex format
-        StringBuffer sb = new StringBuffer("");
-        for (int i = 0; i < mdbytes.length; i++) {
-            sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-        }
-        fileHash = sb.toString();
-    }
+    
 
 }

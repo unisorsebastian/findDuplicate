@@ -11,13 +11,15 @@ public class DuplicateFileDetail {
 		return hash;
 	}
 
-	public void addDuplicate(FileDetail fileDetail) {
-		if (hash == null) {
+	public boolean addDuplicate(FileDetail fileDetail) {
+		boolean result = false;
+	    if (hash == null) {
 			hash = fileDetail.getFileHash();
 		}
 		if (fileDetail.getFileHash().equals(hash)) {
-			duplicates.add(fileDetail);
+			result = duplicates.add(fileDetail);
 		}
+		return result;
 	}
 
 	public Set<FileDetail> getDuplicates() {

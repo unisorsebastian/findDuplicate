@@ -24,8 +24,11 @@ public class FileServiceLightImpl extends FileServiceImpl {
         String result = null;
         int oneKbInBytes = 1024;
         int oneMbInBytes = 1024*oneKbInBytes;
+        int threeMbInBytes = 3*oneMbInBytes;
         int fiveMbInBytes = 5*oneMbInBytes;
+        int nineMbInBytes = 9*oneMbInBytes;
         int fiveMbInKb = fiveMbInBytes/1024;
+        int threeMbInKb = threeMbInBytes/1024;
         
         int noOfMB = 5 * 1024;
         int bytesTo5MB=1024*noOfMB;
@@ -38,13 +41,13 @@ public class FileServiceLightImpl extends FileServiceImpl {
             int nread = 0;
             int j = 0;
 
-            //file is bigger than 10MB
-            if (fileSize > 2*fiveMbInBytes) {
+            //file is bigger than 9MB
+            if (fileSize > nineMbInBytes) {
                 System.out.println("filesize:"+fileSize+" filenae:"+file.getName());
                 int readSize=0;
                 int k=0;
-                //read first 5MB
-                for (k = 0; k < fiveMbInKb;k++) {
+                //read first 3MB
+                for (k = 0; k < threeMbInKb;k++) {
                     //read 1KB
                     readSize=fis.read(dataBytes, 0, dataBytes.length);
                     if(readSize<1024){

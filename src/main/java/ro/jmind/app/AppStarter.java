@@ -64,13 +64,15 @@ public class AppStarter {
     public static void main(String... a) {
         AppStarter app = new AppStarter();
         
-        long startTime = System.currentTimeMillis();
-        app.generateReportsLight();
-        System.out.println("Light service done in:" + (System.currentTimeMillis() - startTime));
+//        long startTime = System.currentTimeMillis();
+//        app.generateReportsLight();
+//        System.out.println("Light service done in:" + (System.currentTimeMillis() - startTime));
+//        
+//        startTime = System.currentTimeMillis();
+//        app.generateReports();
+//        System.out.println("Full service done in:" + (System.currentTimeMillis() - startTime));
+        app.fileServiceLight.calculateHash(new File("C:/Users/sunisor/remove/New folder/20170523_112313.mp4"));
         
-        startTime = System.currentTimeMillis();
-        app.generateReports();
-        System.out.println("Full service done in:" + (System.currentTimeMillis() - startTime));
 
     }
 

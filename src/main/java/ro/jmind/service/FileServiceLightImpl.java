@@ -22,7 +22,12 @@ public class FileServiceLightImpl extends FileServiceImpl {
     @Override
     public String calculateHash(File file) {
         String result = null;
+        int oneKbInBytes = 1024;
+        int oneMbInBytes = 1024*oneKbInBytes;
+        int fiveMbInBytes = 5*oneMbInBytes;
+        
         int noOfMB = 5 * 1024;
+        int bytesTo5MB=1024*noOfMB;
         final long fileSize = file.length();
         try {
             MessageDigest md = MessageDigest.getInstance("SHA1");
@@ -31,12 +36,31 @@ public class FileServiceLightImpl extends FileServiceImpl {
 
             int nread = 0;
             int j = 0;
-            
-            //read first 5MB
-            for(int k=0;k<noOfMB;){
-                fis.read(dataBytes, 0, dataBytes.length);
+
+
+            if (fileSize > 2*fiveMbInBytes) {
+                System.out.println("filesize:"+fileSize+" filenae:"+file.getName());
+                int readSize=0;
+                for (int k = 0; k < noOfMB;k++) {
+                    //read 1KB
+                    readSize=fis.read(dataBytes, 0, dataBytes.length);
+                    if(readSize<1024){
+                        System.out.println("do something");
+                    }
+                }
+                //this should got at the last 5MB of the file
+                final long skipBytes = fileSize-2*bytesTo5MB-2;
+                fis.skip(skipBytes);
+                
+                //read last 5MB
+                for (int k = 0; k < noOfMB;k++) {
+                    //read 1KB
+                    readSize=fis.read(dataBytes, 0, dataBytes.length);
+                    if(readSize<1024){
+                        System.out.println("do something");
+                    }
+                }
             }
-            
             while ((nread = fis.read(dataBytes)) != -1) {
                 md.update(dataBytes, 0, nread);
                 j++;
@@ -69,7 +93,7 @@ public class FileServiceLightImpl extends FileServiceImpl {
             long calculationTime = System.currentTimeMillis();
             final String calculateHash = calculateHash(f);
             e.setFileHash(calculateHash);
-            e.setCalculationTime(System.currentTimeMillis()-calculationTime);
+            e.setCalculationTime(System.currentTimeMillis() - calculationTime);
             filesDetail.add(e);
             params[0] = i;
             params[1] = numberOfFiles;

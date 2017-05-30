@@ -25,6 +25,7 @@ public class FileServiceLightImpl extends FileServiceImpl {
         int oneKbInBytes = 1024;
         int oneMbInBytes = 1024*oneKbInBytes;
         int fiveMbInBytes = 5*oneMbInBytes;
+        int fiveMbInKb = fiveMbInBytes/1024;
         
         int noOfMB = 5 * 1024;
         int bytesTo5MB=1024*noOfMB;
@@ -37,11 +38,13 @@ public class FileServiceLightImpl extends FileServiceImpl {
             int nread = 0;
             int j = 0;
 
-
+            //file is bigger than 10MB
             if (fileSize > 2*fiveMbInBytes) {
                 System.out.println("filesize:"+fileSize+" filenae:"+file.getName());
                 int readSize=0;
-                for (int k = 0; k < noOfMB;k++) {
+                int k=0;
+                //read first 5MB
+                for (k = 0; k < fiveMbInKb;k++) {
                     //read 1KB
                     readSize=fis.read(dataBytes, 0, dataBytes.length);
                     if(readSize<1024){
@@ -49,17 +52,18 @@ public class FileServiceLightImpl extends FileServiceImpl {
                     }
                 }
                 //this should got at the last 5MB of the file
-                final long skipBytes = fileSize-2*bytesTo5MB-2;
+                final long skipBytes = fileSize-2*bytesTo5MB+1;
                 fis.skip(skipBytes);
                 
                 //read last 5MB
-                for (int k = 0; k < noOfMB;k++) {
+                for (k = 0; k < fiveMbInKb;k++) {
                     //read 1KB
                     readSize=fis.read(dataBytes, 0, dataBytes.length);
                     if(readSize<1024){
                         System.out.println("do something");
                     }
                 }
+                System.out.println("end file?? ->>>>K"+k);
             }
             while ((nread = fis.read(dataBytes)) != -1) {
                 md.update(dataBytes, 0, nread);

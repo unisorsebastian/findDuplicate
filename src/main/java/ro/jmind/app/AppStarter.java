@@ -20,7 +20,7 @@ public class AppStarter {
 	}
 	public static void main(String ...a){
 //		String folderLocation = "D:/_media/photos";
-		String folderLocation = "D:\\_media\\photos\\remove";
+		String folderLocation = "C:/Users/sunisor/remove";
 		
 		FileService fileService = new FileServiceImpl();
 		ReportService reportService = new ReportServiceImpl();
@@ -30,16 +30,18 @@ public class AppStarter {
 		reportService.createFileListReport(fileList, folderLocation);
 		
 //		TODO remove
-		List<String> fileLocation = new ArrayList<>();
-		for(File f:fileList){
-			fileLocation.add(f.getAbsolutePath());
-		}
-		List<FileDetail> test  = fileService.gatherFilesDetailByFileName(fileLocation);
-		List<DuplicateFileDetail> duplicatesByString = fileService.calculateDuplicates(test);
+//		List<String> fileLocation = new ArrayList<>();
+//		for(File f:fileList){
+//			fileLocation.add(f.getAbsolutePath());
+//		}
+//		List<FileDetail> test  = fileService.gatherFilesDetailByFileName(fileLocation);
+//		List<DuplicateFileDetail> duplicatesByString = fileService.calculateDuplicates(test);
 //      TODO remove end		
 		
-		
+		//including sha
 		List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetail(fileList);
+		//without sha
+		//List<FileDetail> gatherFilesDetail = fileService.gatherFilesDetailLight(fileList);
 		reportService.createFileDetailReport(gatherFilesDetail, folderLocation);
 		
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(gatherFilesDetail);

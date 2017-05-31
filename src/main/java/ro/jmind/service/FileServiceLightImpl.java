@@ -79,7 +79,7 @@ public class FileServiceLightImpl extends FileServiceImpl {
         int readSize = 0;
         FileInputStream fis = new FileInputStream(file);
 
-        System.out.println("filesize:" + fileSize + " filenae:" + file.getName());
+        System.out.println("filesize:" + fileSize + " filename:" + file.getName());
 
         // read first part
         for (int i = 0; i < bufferMultiplicator; i++) {

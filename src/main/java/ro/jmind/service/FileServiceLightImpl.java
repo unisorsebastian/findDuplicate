@@ -90,8 +90,8 @@ public class FileServiceLightImpl extends FileServiceImpl {
             }
             for (int i = 0; i < bufferMultiplicator; i++) {
                 readSize = fis.read(buffer, 0, buffer.length);
-                if(readSize!=1024){
-                    new RuntimeException("something is wrong, readSize!=1024");
+                if(readSize!=buffer.length){
+                    throw new RuntimeException("something is wrong, readSize!=1024");
                 }
                 System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
                 copyIdx = copyIdx + buffer.length;

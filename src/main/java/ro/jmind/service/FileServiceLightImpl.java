@@ -53,7 +53,7 @@ public class FileServiceLightImpl extends FileServiceImpl {
     }
 
     public void parseFile(File file) throws IOException {
-
+        final long startTime = System.currentTimeMillis(); 
         // buffer reader set at 4KB
         final int halfBufferSize = 2048;
         final int bufferSize = halfBufferSize * 2;
@@ -79,55 +79,26 @@ public class FileServiceLightImpl extends FileServiceImpl {
         int readSize = 0;
         FileInputStream fis = new FileInputStream(file);
 
-        System.out.println("filesize:" + fileSize + " filename:" + file.getName());
-
-        // read first part
-        for (int i = 0; i < bufferMultiplicator; i++) {
-            readSize = fis.read(buffer, 0, buffer.length);
-            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
-            copyIdx = copyIdx + buffer.length;
+        for (int part = 0; part < 3; part++) {
+            if (part == 1) {
+                // skip to middle start point
+                fis.skip(skipBytesFromEndOfFirstSectionToMiddle);
+            }
+            if (part == 2) {
+                // skip to last part of the file
+                fis.skip(skipBytesFromMiddleToEnd);
+            }
+            for (int i = 0; i < bufferMultiplicator; i++) {
+                readSize = fis.read(buffer, 0, buffer.length);
+                if(readSize!=1024){
+                    new RuntimeException("something is wrong, readSize!=1024");
+                }
+                System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
+                copyIdx = copyIdx + buffer.length;
+            }
         }
-
-        // skip to middle start point
-        fis.skip(skipBytesFromEndOfFirstSectionToMiddle);
-        // read middle part
-        for (int i = 0; i < bufferMultiplicator; i++) {
-            readSize = fis.read(buffer, 0, buffer.length);
-            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
-            copyIdx = copyIdx + buffer.length;
-        }
-
-        // skip to last part of the file
-        fis.skip(skipBytesFromMiddleToEnd);
-        // read last part
-        for (int i = 0; i < bufferMultiplicator; i++) {
-            readSize = fis.read(buffer, 0, buffer.length);
-            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
-            copyIdx = copyIdx + buffer.length;
-        }
-
         fis.close();
-
-        //check for 0
-//        for (int i = 0; i < sampleData.length; i++) {
-//            final byte b = sampleData[i];
-//            if (b == 0) {
-//                System.out.println(i);
-//            }
-//        }
-        System.out.println("done");
-        // testing
-//        fis = new FileInputStream(file);
-//        int readVal;
-//        int j = 0;
-//        while ((readVal = fis.read()) != -1) {
-//            if (readVal == 0) {
-//                System.out.println("index:" + j);
-//            }
-//            j++;
-//        }
-//        fis.close();
-//        System.out.println("DONE!!"+j);
+        System.out.println("filesize:" + fileSize + " filename:" + file.getName()+" time took:"+(System.currentTimeMillis()-startTime));
     }
 
     @Override

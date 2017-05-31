@@ -71,8 +71,10 @@ public class AppStarter {
 //        startTime = System.currentTimeMillis();
 //        app.generateReports();
 //        System.out.println("Full service done in:" + (System.currentTimeMillis() - startTime));
-        app.fileServiceLight.calculateHash(new File("C:/Users/sunisor/remove/New folder/20170523_112313.mp4"));
         
+        //app.fileServiceLight.calculateHash(new File("C:/Users/sunisor/remove/New folder/20170523_112313.mp4"));
+        FileServiceLightImpl serv =(FileServiceLightImpl)app.fileServiceLight;
+        serv.createTestFile();
 
     }
 

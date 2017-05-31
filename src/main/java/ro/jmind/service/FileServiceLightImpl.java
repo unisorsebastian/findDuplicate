@@ -2,12 +2,14 @@ package ro.jmind.service;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.security.MessageDigest;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 
-import ro.jmind.model.DuplicateFileDetail;
 import ro.jmind.model.FileDetail;
 
 public class FileServiceLightImpl extends FileServiceImpl {
@@ -19,74 +21,105 @@ public class FileServiceLightImpl extends FileServiceImpl {
         return gatherFilesDetail;
     }
 
+    public void createTestFile() {
+        try {
+            final int fileSizeInBytes = 1024 * 1024 * 7;
+            final int twoMB = 1024*1024*2;
+            byte[] aBytes = new byte[fileSizeInBytes];
+            for (int i = 0; i < fileSizeInBytes; i++) {
+                if(i>=0 && i<twoMB){
+                    aBytes[i] = 1;
+                    continue;
+                }
+                if(i>=twoMB&&i<fileSizeInBytes-twoMB){
+                    aBytes[i] = 2;
+                    continue;
+                }
+                if(i>fileSizeInBytes-twoMB){
+                    aBytes[i] = 3;
+                    continue;
+                }
+            }
+
+            final String fileLocation = "C:/Users/sunisor/remove/fixedFileSize.bin";
+            Path path = Paths.get(fileLocation);
+            Files.write(path, aBytes); // creates, overwrites
+
+            parseFile(new File(fileLocation));
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public void parseFile(File file) throws IOException {
+
+        // buffer reader set at 4KB
+        final int halfBufferSize = 2048;
+        final int bufferSize = halfBufferSize * 2;
+        final int bufferMultiplicator = 512;
+        final byte[] buffer = new byte[bufferSize];
+        //4KB*512=2MB
+        final int sampleDataSize = bufferSize * bufferMultiplicator;
+        final byte[] sampleData = new byte[3 * sampleDataSize];
+
+        final long fileSize = file.length();
+
+        final long idxMiddle = fileSize / 2 - 1;
+        final long idxMiddleStartRead = idxMiddle - sampleDataSize / 2 + 1;
+        final long idxMiddleEndRead = idxMiddleStartRead + sampleDataSize - 1;
+
+        final long skipBytesFromEndOfFirstSectionToMiddle = idxMiddleStartRead - sampleDataSize;
+
+        final long idxLastStarRead = fileSize - sampleDataSize;
+        final long skipBytesFromMiddleToEnd = idxLastStarRead - idxMiddleEndRead - 1;
+
+        int copyIdx = 0;
+
+        int readSize = 0;
+        FileInputStream fis = new FileInputStream(file);
+
+        System.out.println("filesize:" + fileSize + " filenae:" + file.getName());
+
+        // read first part
+        for (int i = 0; i < bufferMultiplicator; i++) {
+            readSize = fis.read(buffer, 0, buffer.length);
+            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
+            copyIdx = copyIdx + buffer.length;
+        }
+
+        // skip to middle start point
+        fis.skip(skipBytesFromEndOfFirstSectionToMiddle);
+        // read middle part
+        for (int i = 0; i < bufferMultiplicator; i++) {
+            readSize = fis.read(buffer, 0, buffer.length);
+            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
+            copyIdx = copyIdx + buffer.length;
+        }
+
+        // skip to last part of the file
+        fis.skip(skipBytesFromMiddleToEnd);
+        // read last part
+        for (int i = 0; i < bufferMultiplicator; i++) {
+            readSize = fis.read(buffer, 0, buffer.length);
+            System.arraycopy(buffer, 0, sampleData, copyIdx, buffer.length);
+            copyIdx = copyIdx + buffer.length;
+        }
+
+        System.out.println("DONE!!");
+        for(int i=0;i<sampleData.length;i++){
+            final byte b = sampleData[i];
+            if(b==0){
+                System.out.println(i);
+            }
+        }
+        fis.close();
+    }
+
     @Override
     public String calculateHash(File file) {
         String result = null;
-        int oneKbInBytes = 1024;
-        int oneMbInBytes = 1024*oneKbInBytes;
-        int threeMbInBytes = 3*oneMbInBytes;
-        int fiveMbInBytes = 5*oneMbInBytes;
-        int nineMbInBytes = 9*oneMbInBytes;
-        int fiveMbInKb = fiveMbInBytes/1024;
-        int threeMbInKb = threeMbInBytes/1024;
-        
-        int noOfMB = 5 * 1024;
-        int bytesTo5MB=1024*noOfMB;
-        final long fileSize = file.length();
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA1");
-            FileInputStream fis = new FileInputStream(file);
-            byte[] dataBytes = new byte[1024];
 
-            int nread = 0;
-            int j = 0;
-
-            //file is bigger than 9MB
-            if (fileSize > nineMbInBytes) {
-                System.out.println("filesize:"+fileSize+" filenae:"+file.getName());
-                int readSize=0;
-                int k=0;
-                //read first 3MB
-                for (k = 0; k < threeMbInKb;k++) {
-                    //read 1KB
-                    readSize=fis.read(dataBytes, 0, dataBytes.length);
-                    if(readSize<1024){
-                        System.out.println("do something");
-                    }
-                }
-                //this should got at the last 5MB of the file
-                final long skipBytes = fileSize-2*bytesTo5MB+1;
-                fis.skip(skipBytes);
-                
-                //read last 5MB
-                for (k = 0; k < fiveMbInKb;k++) {
-                    //read 1KB
-                    readSize=fis.read(dataBytes, 0, dataBytes.length);
-                    if(readSize<1024){
-                        System.out.println("do something");
-                    }
-                }
-                System.out.println("end file?? ->>>>K"+k);
-            }
-            while ((nread = fis.read(dataBytes)) != -1) {
-                md.update(dataBytes, 0, nread);
-                j++;
-                if (j > noOfMB) {
-                    break;
-                }
-            }
-            fis.close();
-            byte[] mdbytes = md.digest();
-
-            // convert the byte to hex format
-            StringBuffer sb = new StringBuffer("");
-            for (int i = 0; i < mdbytes.length; i++) {
-                sb.append(Integer.toString((mdbytes[i] & 0xff) + 0x100, 16).substring(1));
-            }
-            result = sb.toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
         return result;
     }
 

@@ -24,18 +24,18 @@ public class FileServiceLightImpl extends FileServiceImpl {
     public void createTestFile() {
         try {
             final int fileSizeInBytes = 1024 * 1024 * 7;
-            final int twoMB = 1024*1024*2;
+            final int twoMB = 1024 * 1024 * 2;
             byte[] aBytes = new byte[fileSizeInBytes];
             for (int i = 0; i < fileSizeInBytes; i++) {
-                if(i>=0 && i<twoMB){
+                if (i >= 0 && i < twoMB) {
                     aBytes[i] = 1;
                     continue;
                 }
-                if(i>=twoMB&&i<fileSizeInBytes-twoMB){
+                if (i >= twoMB && i < fileSizeInBytes - twoMB) {
                     aBytes[i] = 2;
                     continue;
                 }
-                if(i>fileSizeInBytes-twoMB){
+                if (i >= fileSizeInBytes - twoMB) {
                     aBytes[i] = 3;
                     continue;
                 }
@@ -59,7 +59,7 @@ public class FileServiceLightImpl extends FileServiceImpl {
         final int bufferSize = halfBufferSize * 2;
         final int bufferMultiplicator = 512;
         final byte[] buffer = new byte[bufferSize];
-        //4KB*512=2MB
+        // 4KB*512=2MB
         final int sampleDataSize = bufferSize * bufferMultiplicator;
         final byte[] sampleData = new byte[3 * sampleDataSize];
 
@@ -106,14 +106,28 @@ public class FileServiceLightImpl extends FileServiceImpl {
             copyIdx = copyIdx + buffer.length;
         }
 
-        System.out.println("DONE!!");
-        for(int i=0;i<sampleData.length;i++){
-            final byte b = sampleData[i];
-            if(b==0){
-                System.out.println(i);
-            }
-        }
         fis.close();
+
+        //check for 0
+//        for (int i = 0; i < sampleData.length; i++) {
+//            final byte b = sampleData[i];
+//            if (b == 0) {
+//                System.out.println(i);
+//            }
+//        }
+        System.out.println("done");
+        // testing
+//        fis = new FileInputStream(file);
+//        int readVal;
+//        int j = 0;
+//        while ((readVal = fis.read()) != -1) {
+//            if (readVal == 0) {
+//                System.out.println("index:" + j);
+//            }
+//            j++;
+//        }
+//        fis.close();
+//        System.out.println("DONE!!"+j);
     }
 
     @Override

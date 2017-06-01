@@ -36,6 +36,19 @@ public class AppStarter {
 	static String reportFilesMarkedForDeletion = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletion");
 	static String reportFilesMarkedForDeletionLight = folderLocation + "\\"
 			+ RB.getString("report.filesMarkedForDeletionLight");
+	
+	
+	public static void main(String... a) {
+		long startTime = System.currentTimeMillis();
+		AppStarter app = new AppStarter();
+		// app.generateReports();
+		//app.generateFullWithoutJsonReports();
+		app.generateFullReports();
+		int totalTimeInSec = (int) (System.currentTimeMillis() - startTime) / 1000;
+		System.out.println("total time:" + totalTimeInSec + " seconds");
+		System.out.println("---DONE---");
+
+	}
 
 	public void generateReports() {
 		List<File> fileList = fileService.getFileList(folderLocation);
@@ -101,7 +114,9 @@ public class AppStarter {
 	
 	public void generateFullReports() {
 		List<File> fileList = fileService.getFileList(folderLocation);
+		reportService.createFileListReport(fileList, folderLocation+"\\reportAllFiles.txt");
 		List<FileDetail> allFileDetail = fileService.getFileDetailList(fileList);
+		reportService.createFileDetailReport(allFileDetail, folderLocation+"\\reportLightAllFiles.txt");
 
 		// populate SamapleDate on FileDetail
 		// this is most time consuming because of updateSampleData
@@ -114,8 +129,7 @@ public class AppStarter {
 			System.out.println("updateSampleData file " + (++fileCounter) + " of " + allFileDetailSize + " timeTook:"
 					+ fd.getCalculationTime() + " MB:" + fd.getHumanFileSize() + " name:" + absoluteFile.getName());
 		}
-		reportService.createFileListReport(fileList, reportFilesFoundInSource);
-		reportService.createFileDetailReport(allFileDetail, reportFilesDetails);
+		reportService.createFileDetailReport(allFileDetail, folderLocation+"\\reportLightAllFiles.txt");
 
 		// this is NOT the most time consuming because FileDetail does contain
 		// SampleData
@@ -125,18 +139,6 @@ public class AppStarter {
 		reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicated);
 		// mark for deletion report
 		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
-
-	}
-
-	public static void main(String... a) {
-		long startTime = System.currentTimeMillis();
-		AppStarter app = new AppStarter();
-		// app.generateReports();
-		//app.generateFullWithoutJsonReports();
-		app.generateFullReports();
-		int totalTimeInSec = (int) (System.currentTimeMillis() - startTime) / 1000;
-		System.out.println("total time:" + totalTimeInSec + " seconds");
-		System.out.println("---DONE---");
 
 	}
 

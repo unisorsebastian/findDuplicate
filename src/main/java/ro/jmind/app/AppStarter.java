@@ -3,90 +3,99 @@ package ro.jmind.app;
 import static ro.jmind.model.Constants.RB;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import ro.jmind.model.DuplicateFileDetail;
 import ro.jmind.model.FileDetail;
+import ro.jmind.model.FileDetailSizeComparator;
+import ro.jmind.model.SampleData;
 import ro.jmind.service.FileService;
 import ro.jmind.service.FileServiceImpl;
-import ro.jmind.service.FileServiceLightImpl;
 import ro.jmind.service.ReportService;
 import ro.jmind.service.ReportServiceImpl;
 
 public class AppStarter {
 
-	FileService fileService = new FileServiceImpl();
-	FileService fileServiceLight = new FileServiceLightImpl();
-	ReportService reportService = new ReportServiceImpl();
+	private FileService fileService = new FileServiceImpl();
+	private ReportService reportService = new ReportServiceImpl();
 
-	String folderLocation = RB.getString("base.folder");
-	String reportFilesFoundInSource = folderLocation + "\\" + RB.getString("report.filesFoundInSource");
+	static String folderLocation = RB.getString("base.folder");
+	static String reportFilesFoundInSource = folderLocation + "\\" + RB.getString("report.filesFoundInSource");
 
-	String reportFilesDetails = folderLocation + "\\" + RB.getString("report.filesDetail");
-	String reportFilesDetailsLight = folderLocation + "\\" + RB.getString("report.filesDetailLight");
+	static String reportFilesDetails = folderLocation + "\\" + RB.getString("report.filesDetail");
+	static String reportFilesDetailsLight = folderLocation + "\\" + RB.getString("report.filesDetailLight");
 
-	String reportFilesDuplicated = folderLocation + "\\" + RB.getString("report.filesDuplicated");
-	String reportFilesDuplicatedLight = folderLocation + "\\" + RB.getString("report.filesDuplicatedLight");
+	static String reportFilesDuplicated = folderLocation + "\\" + RB.getString("report.filesDuplicated");
+	static String reportFilesDuplicatedLight = folderLocation + "\\" + RB.getString("report.filesDuplicatedLight");
 
-	String reportFilesMarkedForDeletion = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletion");
-	String reportFilesMarkedForDeletionLight = folderLocation + "\\"
+	static String reportFilesMarkedForDeletion = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletion");
+	static String reportFilesMarkedForDeletionLight = folderLocation + "\\"
 			+ RB.getString("report.filesMarkedForDeletionLight");
-
-	public AppStarter() {
-
-	}
-
-	public void generateReportsLight() {
-		List<File> fileList = fileServiceLight.getFileList(folderLocation);
-		List<FileDetail> fileDetailLight = fileServiceLight.gatherFilesDetail(fileList);
-		List<DuplicateFileDetail> duplicates = fileServiceLight.calculateDuplicates(fileDetailLight);
-		List<FileDetail> markAllForDeletion = fileServiceLight.markForDeletion(duplicates);
-
-		reportService.createFileListReport(fileList, reportFilesFoundInSource);
-		reportService.createFileDetailReport(fileDetailLight, reportFilesDetailsLight);
-		reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicatedLight);
-		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletionLight);
-
-	}
 
 	public void generateReports() {
 		List<File> fileList = fileService.getFileList(folderLocation);
-		List<FileDetail> fileDetail = fileService.gatherFilesDetail(fileList);
+		List<FileDetail> fileDetail = fileService.getFileDetailList(fileList);
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(fileDetail);
 		List<FileDetail> markAllForDeletion = fileService.markForDeletion(duplicates);
 
 		reportService.createFileListReport(fileList, reportFilesFoundInSource);
 		reportService.createFileDetailReport(fileDetail, reportFilesDetails);
 		reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicated);
+		// mark for deletion report
 		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
 
 	}
 
 	public static void main(String... a) {
 		AppStarter app = new AppStarter();
+		FileService service = app.fileService;
+		ReportService report = app.reportService;
 
-		// long startTime = System.currentTimeMillis();
-		// app.generateReportsLight();
-		// System.out.println("Light service done in:" +
-		// (System.currentTimeMillis() - startTime));
-		//
-		// startTime = System.currentTimeMillis();
-		// app.generateReports();
-		// System.out.println("Full service done in:" +
-		// (System.currentTimeMillis() - startTime));
+		// String bigDummyFile = "D:/_media/photos/remove/fixedFileSize.bin";
+		// service.createTestFile(bigDummyFile, 2500);
 
-		// app.fileServiceLight.calculateHash(new
-		// File("C:/Users/sunisor/remove/New folder/20170523_112313.mp4"));
-		FileServiceLightImpl serv = (FileServiceLightImpl) app.fileServiceLight;
-		// serv.createTestFile();
+		List<File> fileListAll = service.getFileList(folderLocation);
+		report.createFileListReport(fileListAll, folderLocation+"\\allFiles.txt");
+		
+		List<FileDetail> fileDetailLight = service.getFileDetailList(fileListAll);
+		Collections.sort(fileDetailLight, new FileDetailSizeComparator<>());
+		report.createFileDetailReport(fileDetailLight, folderLocation+"\\allFileDetailLight.txt");
+		
+		
+		// clean filelist - remove .json files
+		FileDetail fd = null;
+		String extension = null;
+		List<File> fileList = new ArrayList<>();
+		for (File f : fileListAll) {
+			fd = new FileDetail(f);
+			extension = fd.getExtension();
+			// fileList.add(f);
+			if (!".json".equalsIgnoreCase(extension)) {
+				fileList.add(f);
+			}
+		}
 
-		String fileLocation = "D:/_media/photos/remove/fixedFileSize.bin";
-		serv.createTestFile(fileLocation, 2500);
-
+		List<FileDetail> fileDetail = service.getFileDetailList(fileList);
+		Collections.sort(fileDetail, new FileDetailSizeComparator<>());
+		int i=0;
 		long startTime = System.currentTimeMillis();
-		byte[] byteArraySampleData = serv.getByteArraySampleData(new File(fileLocation));
-		System.out.println("time took:" + (System.currentTimeMillis() - startTime));
-		System.out.println("done");
+//		for (FileDetail fda : fileDetail) {
+//			SampleData calculateSampleData = service.calculateSampleData(fda);
+//			System.out.println("file "+(++i)+" of "+" "+fileDetail.size()+" "+fda.getAbsoluteFile() + "\t"
+//					+ calculateSampleData.getTimeTook() + "\t" +fda.getFileSize()+"\t"+calculateSampleData.getSampleDataMethod()+"\t"+ fda.getFileHash());
+//
+//		}
+		System.out.println("done sample data in "+(System.currentTimeMillis()-startTime));
+		report.createFileDetailReport(fileDetail, folderLocation+"\\filterFileDetail.txt");
+
+		List<DuplicateFileDetail> calculateDuplicates = service.calculateDuplicates(fileDetail);
+		report.createDuplicatedFileReport(calculateDuplicates, folderLocation+"\\reportDuplicates.txt");
+//		List<FileDetail> markAllForDeletion = service.markForDeletion(calculateDuplicates);
+
+//		report.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
+
 	}
 
 }

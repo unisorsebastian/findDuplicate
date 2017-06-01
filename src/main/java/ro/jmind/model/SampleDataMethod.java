@@ -1,0 +1,6 @@
+package ro.jmind.model;
+
+public enum SampleDataMethod {
+	FULL_SIZE_BYTE_ARRAY, PARTIAL_SIZE_BIG_FILE_BYTE_ARRAY, PARTIAL_SIZE_BYTE_ARRAY, FILE_SIZE, FAIL
+
+}

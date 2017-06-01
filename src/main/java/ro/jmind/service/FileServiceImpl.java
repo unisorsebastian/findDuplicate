@@ -253,15 +253,13 @@ public class FileServiceImpl implements FileService {
 			params[4] = f.getAbsolutePath();
 
 			// TODO add logging
-			System.out.println(String
-					.format("Create FileDetail, file number %1s out of %2s; size %3s; sha1 %4s; file %5s", params));
+			System.out.println(String.format("Create FileDetail, file number %1s out of %2s; size %3s; sha1 %4s; file %5s", params));
 			i++;
 		}
 		return result;
 	}
 
-	private List<DuplicateFileDetail> calculateDuplicates(List<FileDetail> filesDetailLeft,
-			List<FileDetail> filesDetailRight) {
+	private List<DuplicateFileDetail> calculateDuplicates(List<FileDetail> filesDetailLeft, List<FileDetail> filesDetailRight) {
 		List<DuplicateFileDetail> duplicateFilesList = new ArrayList<>();
 
 		Collections.sort(filesDetailLeft, new FileDetailSizeComparator<>());
@@ -274,22 +272,22 @@ public class FileServiceImpl implements FileService {
 		for (FileDetail fdLeft : filesDetailLeft) {
 			leftPath = fdLeft.getAbsoluteFile().getAbsolutePath();
 			System.out.println("Calculate duplicatates " + indexFile + " of " + filesDetailLeft.size() + ", file:"
-					+ fdLeft.getAbsoluteFile().getName());
+			        + fdLeft.getAbsoluteFile().getName());
 			indexFile++;
 			// remove the elem from right list
-			// if (rightElemToRemove != null) {
-			// Iterator<FileDetail> it = filesDetailRight.iterator();
-			// FileDetail next=null;
-			// while (it.hasNext()) {
-			// next = it.next();
-			// if(next==rightElemToRemove){
-			// it.remove();
-			// rightElemToRemove = null;
-			// break;
-			// }
-			// }
-			//
-			// }
+			if (rightElemToRemove != null) {
+				Iterator<FileDetail> it = filesDetailRight.iterator();
+				FileDetail next = null;
+				while (it.hasNext()) {
+					next = it.next();
+					if (next == rightElemToRemove) {
+						it.remove();
+						rightElemToRemove = null;
+						break;
+					}
+				}
+
+			}
 			for (FileDetail fdRight : filesDetailRight) {
 				rightPath = fdRight.getAbsoluteFile().getAbsolutePath();
 				if (leftPath.equals(rightPath)) {

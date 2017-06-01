@@ -34,15 +34,13 @@ public class AppStarter {
 	static String reportFilesDuplicatedLight = folderLocation + "\\" + RB.getString("report.filesDuplicatedLight");
 
 	static String reportFilesMarkedForDeletion = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletion");
-	static String reportFilesMarkedForDeletionLight = folderLocation + "\\"
-			+ RB.getString("report.filesMarkedForDeletionLight");
-	
-	
+	static String reportFilesMarkedForDeletionLight = folderLocation + "\\" + RB.getString("report.filesMarkedForDeletionLight");
+
 	public static void main(String... a) {
 		long startTime = System.currentTimeMillis();
 		AppStarter app = new AppStarter();
 		// app.generateReports();
-		//app.generateFullWithoutJsonReports();
+		// app.generateFullWithoutJsonReports();
 		app.generateFullReports();
 		int totalTimeInSec = (int) (System.currentTimeMillis() - startTime) / 1000;
 		System.out.println("total time:" + totalTimeInSec + " seconds");
@@ -96,7 +94,7 @@ public class AppStarter {
 			fileService.updateSampleData(fd);
 			absoluteFile = fd.getAbsoluteFile();
 			System.out.println("updateSampleData file " + (++fileCounter) + " of " + allFileDetailSize + " timeTook:"
-					+ fd.getCalculationTime() + " MB:" + fd.getHumanFileSize() + " name:" + absoluteFile.getName());
+			        + fd.getCalculationTime() + " MB:" + fd.getHumanFileSize() + " name:" + absoluteFile.getName());
 		}
 
 		// this is NOT the most time consuming because FileDetail does contain
@@ -111,12 +109,12 @@ public class AppStarter {
 		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
 
 	}
-	
+
 	public void generateFullReports() {
 		List<File> fileList = fileService.getFileList(folderLocation);
-		reportService.createFileListReport(fileList, folderLocation+"\\reportAllFiles.txt");
+		reportService.createFileListReport(fileList, folderLocation + "\\reportAllFiles.txt");
 		List<FileDetail> allFileDetail = fileService.getFileDetailList(fileList);
-		reportService.createFileDetailReport(allFileDetail, folderLocation+"\\reportLightAllFiles.txt");
+		reportService.createFileDetailReport(allFileDetail, folderLocation + "\\reportLightFilesDetail.txt");
 
 		// populate SamapleDate on FileDetail
 		// this is most time consuming because of updateSampleData
@@ -127,12 +125,11 @@ public class AppStarter {
 			fileService.updateSampleData(fd);
 			absoluteFile = fd.getAbsoluteFile();
 			System.out.println("updateSampleData file " + (++fileCounter) + " of " + allFileDetailSize + " timeTook:"
-					+ fd.getCalculationTime() + " MB:" + fd.getHumanFileSize() + " name:" + absoluteFile.getName());
+			        + fd.getCalculationTime() + " MB:" + fd.getHumanFileSize() + " name:" + absoluteFile.getName());
 		}
-		reportService.createFileDetailReport(allFileDetail, folderLocation+"\\reportLightAllFiles.txt");
+		reportService.createFileDetailReport(allFileDetail, folderLocation + "\\reportFullFilesDetail.txt");
 
-		// this is NOT the most time consuming because FileDetail does contain
-		// SampleData
+		// this is NOT the most time consuming because FileDetail already contains SampleData
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(allFileDetail);
 		List<FileDetail> markAllForDeletion = fileService.markForDeletion(duplicates);
 

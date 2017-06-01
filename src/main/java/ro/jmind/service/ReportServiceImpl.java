@@ -20,9 +20,17 @@ public class ReportServiceImpl implements ReportService {
 	@Override
 	public void createFileListReport(List<File> fileList, String reportFile) {
 		List<String> linesToWrite = new ArrayList<>();
-		linesToWrite.add("file path");
+		StringBuilder sb = new StringBuilder();
+		sb.append("file path");
+		sb.append(Constants.DELIMITER);
+		sb.append("size in bytes");
+		linesToWrite.add(sb.toString());
 		for (File f : fileList) {
-			linesToWrite.add(f.getAbsolutePath());
+			sb.setLength(0);
+			sb.append(f.getAbsolutePath());
+			sb.append(Constants.DELIMITER);
+			sb.append(f.length());
+			linesToWrite.add(sb.toString());
 		}
 		createReportFile(linesToWrite, reportFile);
 
@@ -101,7 +109,6 @@ public class ReportServiceImpl implements ReportService {
 		linesToWrite.add(sb.toString());
 
 		// create body
-
 		for (DuplicateFileDetail dfd : duplicates) {
 			sb.setLength(0);
 			sbTemp.setLength(0);

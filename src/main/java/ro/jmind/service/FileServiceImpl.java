@@ -11,6 +11,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -22,7 +23,6 @@ import ro.jmind.model.SampleDataMethod;
 
 public class FileServiceImpl implements FileService {
 	// private List<FileDetail> filesDetail = new ArrayList<FileDetail>();
-	
 
 	@Override
 	public List<File> getFileList(String location) {
@@ -97,7 +97,8 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public List<DuplicateFileDetail> calculateDuplicates(List<FileDetail> filesDetail) {
-		return calculateDuplicates(filesDetail, filesDetail);
+		List<FileDetail> rightList = new ArrayList<>(filesDetail);
+		return calculateDuplicates(filesDetail, rightList);
 	}
 
 	@Override
@@ -130,9 +131,9 @@ public class FileServiceImpl implements FileService {
 
 	@Override
 	public void updateSampleData(FileDetail fileDetail) {
-//		if (fileDetail.getSampleData() != null) {
-//			return fileDetail.getSampleData();
-//		}
+		if (fileDetail.getSampleData() != null) {
+			return;
+		}
 		final long startTime = System.currentTimeMillis();
 		long timeTook = 0;
 		File file = fileDetail.getAbsoluteFile();
@@ -204,7 +205,7 @@ public class FileServiceImpl implements FileService {
 			e.printStackTrace();
 		}
 		fileDetail.setSampleData((new SampleData(1, SampleDataMethod.FAIL, "")));
-		return  ;
+		return;
 	}
 
 	@Override
@@ -262,18 +263,33 @@ public class FileServiceImpl implements FileService {
 	private List<DuplicateFileDetail> calculateDuplicates(List<FileDetail> filesDetailLeft,
 			List<FileDetail> filesDetailRight) {
 		List<DuplicateFileDetail> duplicateFilesList = new ArrayList<>();
-		
+
 		Collections.sort(filesDetailLeft, new FileDetailSizeComparator<>());
 		Collections.sort(filesDetailRight, new FileDetailSizeComparator<>());
 
 		String leftPath, rightPath;
 
 		int indexFile = 1;
+		FileDetail rightElemToRemove = null;
 		for (FileDetail fdLeft : filesDetailLeft) {
 			leftPath = fdLeft.getAbsoluteFile().getAbsolutePath();
-			System.out.println(
-					"Calculate duplicatates " + indexFile + " of " + filesDetailLeft.size() + ", file:" + fdLeft.getAbsoluteFile().getName());
+			System.out.println("Calculate duplicatates " + indexFile + " of " + filesDetailLeft.size() + ", file:"
+					+ fdLeft.getAbsoluteFile().getName());
 			indexFile++;
+			// remove the elem from right list
+			// if (rightElemToRemove != null) {
+			// Iterator<FileDetail> it = filesDetailRight.iterator();
+			// FileDetail next=null;
+			// while (it.hasNext()) {
+			// next = it.next();
+			// if(next==rightElemToRemove){
+			// it.remove();
+			// rightElemToRemove = null;
+			// break;
+			// }
+			// }
+			//
+			// }
 			for (FileDetail fdRight : filesDetailRight) {
 				rightPath = fdRight.getAbsoluteFile().getAbsolutePath();
 				if (leftPath.equals(rightPath)) {
@@ -281,14 +297,16 @@ public class FileServiceImpl implements FileService {
 				}
 				if (fdLeft.getFileSize() == fdRight.getFileSize()) {
 					// could be duplicated because of the exact size
-					
-					//update sampleData to check for duplicate using SHA1
+
+					// update sampleData to check for duplicate using SHA1
 					updateSampleData(fdLeft);
 					updateSampleData(fdRight);
-					
+
 					if (fdLeft.getSampleData().equals(fdRight.getSampleData())) {
-						//set it as duplicate because of the same hash in sampleData
-						//TODO remove right element from list
+						// set it as duplicate because of the same hash in
+						// sampleData
+						// TODO remove right element from list
+						rightElemToRemove = fdRight;
 						boolean duplicateAdded = false;
 						for (DuplicateFileDetail d : duplicateFilesList) {
 							if (d.getHash().equals(fdRight.getSampleData().getHash())) {
@@ -307,7 +325,7 @@ public class FileServiceImpl implements FileService {
 				}
 			}
 		}
-		
+
 		return duplicateFilesList;
 	}
 }

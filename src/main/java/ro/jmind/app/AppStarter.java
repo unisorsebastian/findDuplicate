@@ -4,8 +4,11 @@ import static ro.jmind.model.Constants.RB;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Collections;
 import java.util.List;
+
+import javax.activation.FileDataSource;
 
 import ro.jmind.model.DuplicateFileDetail;
 import ro.jmind.model.FileDetail;
@@ -36,7 +39,17 @@ public class AppStarter {
 
 	public void generateReports() {
 		List<File> fileList = fileService.getFileList(folderLocation);
-		List<FileDetail> fileDetail = fileService.getFileDetailList(fileList);
+		List<FileDetail> allFileDetail = fileService.getFileDetailList(fileList);
+		
+		//filter some of the files from list .json
+		List<FileDetail> fileDetail = new ArrayList<>();
+		for(FileDetail fd:allFileDetail){
+			if(!".json".equalsIgnoreCase(fd.getExtension())){
+				fileDetail.add(fd);
+			}
+		}
+		
+		//this is the most time consuming if FileDetail does not contain SampleData
 		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(fileDetail);
 		List<FileDetail> markAllForDeletion = fileService.markForDeletion(duplicates);
 
@@ -47,54 +60,44 @@ public class AppStarter {
 		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
 
 	}
+	
+	public void generateFullReports() {
+		List<File> fileList = fileService.getFileList(folderLocation);
+		List<FileDetail> allFileDetail = fileService.getFileDetailList(fileList);
+		
+		//populate SamapleDate on FileDetail
+		//this is most time consuming bacause of updateSampleData
+		File absoluteFile=null;
+		int fileCounter=0;
+		int allFileDetailSize = allFileDetail.size();
+		for(FileDetail fd:allFileDetail){
+			fileService.updateSampleData(fd);
+			absoluteFile = fd.getAbsoluteFile();
+			System.out.println("updateSampleData file "+(++fileCounter)+" of "+allFileDetailSize+" timeTook:"
+			+fd.getCalculationTime()+" MB:"+fd.getHumanFileSize()+" name:"+absoluteFile.getName());
+		}
+		
+		//this is NOT the most time consuming because FileDetail does contain SampleData
+		List<DuplicateFileDetail> duplicates = fileService.calculateDuplicates(allFileDetail);
+		List<FileDetail> markAllForDeletion = fileService.markForDeletion(duplicates);
+
+		reportService.createFileListReport(fileList, reportFilesFoundInSource);
+		reportService.createFileDetailReport(allFileDetail, reportFilesDetails);
+		reportService.createDuplicatedFileReport(duplicates, reportFilesDuplicated);
+		// mark for deletion report
+		reportService.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
+
+	}
 
 	public static void main(String... a) {
+		long startTime= System.currentTimeMillis();
 		AppStarter app = new AppStarter();
-		FileService service = app.fileService;
-		ReportService report = app.reportService;
+		app.generateReports();
+		//app.generateFullReports();
+		int totalTimeInSec = (int)(System.currentTimeMillis()-startTime)/1000; 
+		System.out.println("total time:"+totalTimeInSec+" seconds");
+		System.out.println("---DONE---");
 
-		// String bigDummyFile = "D:/_media/photos/remove/fixedFileSize.bin";
-		// service.createTestFile(bigDummyFile, 2500);
-
-		List<File> fileListAll = service.getFileList(folderLocation);
-		report.createFileListReport(fileListAll, folderLocation+"\\allFiles.txt");
-		
-		List<FileDetail> fileDetailLight = service.getFileDetailList(fileListAll);
-		Collections.sort(fileDetailLight, new FileDetailSizeComparator<>());
-		report.createFileDetailReport(fileDetailLight, folderLocation+"\\allFileDetailLight.txt");
-		
-		
-		// clean filelist - remove .json files
-		FileDetail fd = null;
-		String extension = null;
-		List<File> fileList = new ArrayList<>();
-		for (File f : fileListAll) {
-			fd = new FileDetail(f);
-			extension = fd.getExtension();
-			// fileList.add(f);
-			if (!".json".equalsIgnoreCase(extension)) {
-				fileList.add(f);
-			}
-		}
-
-		List<FileDetail> fileDetail = service.getFileDetailList(fileList);
-		Collections.sort(fileDetail, new FileDetailSizeComparator<>());
-		int i=0;
-		long startTime = System.currentTimeMillis();
-//		for (FileDetail fda : fileDetail) {
-//			SampleData calculateSampleData = service.calculateSampleData(fda);
-//			System.out.println("file "+(++i)+" of "+" "+fileDetail.size()+" "+fda.getAbsoluteFile() + "\t"
-//					+ calculateSampleData.getTimeTook() + "\t" +fda.getFileSize()+"\t"+calculateSampleData.getSampleDataMethod()+"\t"+ fda.getFileHash());
-//
-//		}
-		System.out.println("done sample data in "+(System.currentTimeMillis()-startTime));
-		report.createFileDetailReport(fileDetail, folderLocation+"\\filterFileDetail.txt");
-
-		List<DuplicateFileDetail> calculateDuplicates = service.calculateDuplicates(fileDetail);
-		report.createDuplicatedFileReport(calculateDuplicates, folderLocation+"\\reportDuplicates.txt");
-//		List<FileDetail> markAllForDeletion = service.markForDeletion(calculateDuplicates);
-
-//		report.createFileDetailReport(markAllForDeletion, reportFilesMarkedForDeletion);
 
 	}
 
